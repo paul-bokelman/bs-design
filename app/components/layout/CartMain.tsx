@@ -1,9 +1,7 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
 import {Link} from '@remix-run/react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
-import {CartLineItem} from '~/components/CartLineItem';
-import {CartSummary} from './CartSummary';
+import {useAside, CartLineItem, CartSummary} from '~/components/layout';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -31,7 +29,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   return (
     <div className={className}>
       <CartEmpty hidden={linesCount} layout={layout} />
-      <div className="cart-details">
+      <div className="text-secondary">
         <div aria-labelledby="cart-lines">
           <ul>
             {(cart?.lines?.nodes ?? []).map((line) => (

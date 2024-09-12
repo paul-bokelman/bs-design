@@ -3,4 +3,34 @@
  * https://tailwindcss.com/blog/tailwindcss-v4-alpha#css-first-configuration 
  */
 
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+  }
+
+  @font-face {
+    font-family: Geist;
+    font-weight: 1 999;
+    src: url(../../public/fonts/GeistVF.woff) format('woff');
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

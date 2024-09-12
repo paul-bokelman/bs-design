@@ -6,7 +6,7 @@ import {
   urlWithTrackingParams,
   type PredictiveSearchReturn,
 } from '~/lib/search';
-import {useAside} from './Aside';
+import {useAside} from './layout/Aside';
 
 type PredictiveSearchItems = PredictiveSearchReturn['result']['items'];
 
@@ -73,53 +73,11 @@ export function SearchResultsPredictive({
   });
 }
 
-SearchResultsPredictive.Articles = SearchResultsPredictiveArticles;
 SearchResultsPredictive.Collections = SearchResultsPredictiveCollections;
 SearchResultsPredictive.Pages = SearchResultsPredictivePages;
 SearchResultsPredictive.Products = SearchResultsPredictiveProducts;
 SearchResultsPredictive.Queries = SearchResultsPredictiveQueries;
 SearchResultsPredictive.Empty = SearchResultsPredictiveEmpty;
-
-function SearchResultsPredictiveArticles({
-  term,
-  articles,
-  closeSearch,
-}: PartialPredictiveSearchResult<'articles'>) {
-  if (!articles.length) return null;
-
-  return (
-    <div className="predictive-search-result" key="articles">
-      <h5>Articles</h5>
-      <ul>
-        {articles.map((article) => {
-          const articleUrl = urlWithTrackingParams({
-            baseUrl: `/blogs/${article.blog.handle}/${article.handle}`,
-            trackingParams: article.trackingParameters,
-            term: term.current ?? '',
-          });
-
-          return (
-            <li className="predictive-search-result-item" key={article.id}>
-              <Link onClick={closeSearch} to={articleUrl}>
-                {article.image?.url && (
-                  <Image
-                    alt={article.image.altText ?? ''}
-                    src={article.image.url}
-                    width={50}
-                    height={50}
-                  />
-                )}
-                <div>
-                  <span>{article.title}</span>
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
 
 function SearchResultsPredictiveCollections({
   term,

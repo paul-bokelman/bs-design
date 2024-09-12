@@ -26,7 +26,6 @@ export function getEmptyPredictiveSearchResult(): PredictiveSearchReturn['result
   return {
     total: 0,
     items: {
-      articles: [],
       collections: [],
       products: [],
       pages: [],

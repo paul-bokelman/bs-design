@@ -6,7 +6,7 @@ import {
 } from '@remix-run/react';
 import React, {useRef, useEffect} from 'react';
 import type {PredictiveSearchReturn} from '~/lib/search';
-import {useAside} from './Aside';
+import {useAside} from './layout/Aside';
 
 type SearchFormPredictiveChildren = (args: {
   fetchResults: (event: React.ChangeEvent<HTMLInputElement>) => void;

@@ -62,11 +62,10 @@ export default function SearchPage() {
         <SearchResults.Empty />
       ) : (
         <SearchResults result={result} term={term}>
-          {({articles, pages, products, term}) => (
+          {({pages, products, term}) => (
             <div>
               <SearchResults.Products products={products} term={term} />
               <SearchResults.Pages pages={pages} term={term} />
-              <SearchResults.Articles articles={articles} term={term} />
             </div>
           )}
         </SearchResults>
@@ -129,16 +128,6 @@ const SEARCH_PAGE_FRAGMENT = `#graphql
   }
 ` as const;
 
-const SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
-` as const;
-
 const PAGE_INFO_FRAGMENT = `#graphql
   fragment PageInfoFragment on PageInfo {
     hasNextPage
@@ -159,17 +148,6 @@ export const SEARCH_QUERY = `#graphql
     $term: String!
     $startCursor: String
   ) @inContext(country: $country, language: $language) {
-    articles: search(
-      query: $term,
-      types: [ARTICLE],
-      first: $first,
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
     pages: search(
       query: $term,
       types: [PAGE],
@@ -203,7 +181,6 @@ export const SEARCH_QUERY = `#graphql
   }
   ${SEARCH_PRODUCT_FRAGMENT}
   ${SEARCH_PAGE_FRAGMENT}
-  ${SEARCH_ARTICLE_FRAGMENT}
   ${PAGE_INFO_FRAGMENT}
 ` as const;
 
@@ -222,7 +199,7 @@ async function regularSearch({
   const variables = getPaginationVariables(request, {pageBy: 8});
   const term = String(url.searchParams.get('q') || '');
 
-  // Search articles, pages, and products for the `q` term
+  // Search pages, and products for the `q` term
   const {errors, ...items} = await storefront.query(SEARCH_QUERY, {
     variables: {...variables, term},
   });
@@ -242,29 +219,6 @@ async function regularSearch({
 
   return {type: 'regular', term, error, result: {total, items}};
 }
-
-/**
- * Predictive search query and fragments
- * (adjust as needed)
- */
-const PREDICTIVE_SEARCH_ARTICLE_FRAGMENT = `#graphql
-  fragment PredictiveArticle on Article {
-    __typename
-    id
-    title
-    handle
-    blog {
-      handle
-    }
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-` as const;
 
 const PREDICTIVE_SEARCH_COLLECTION_FRAGMENT = `#graphql
   fragment PredictiveCollection on Collection {
@@ -342,9 +296,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       query: $term,
       types: $types,
     ) {
-      articles {
-        ...PredictiveArticle
-      }
       collections {
         ...PredictiveCollection
       }
@@ -359,7 +310,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       }
     }
   }
-  ${PREDICTIVE_SEARCH_ARTICLE_FRAGMENT}
   ${PREDICTIVE_SEARCH_COLLECTION_FRAGMENT}
   ${PREDICTIVE_SEARCH_PAGE_FRAGMENT}
   ${PREDICTIVE_SEARCH_PRODUCT_FRAGMENT}
@@ -384,7 +334,7 @@ async function predictiveSearch({
 
   if (!term) return {type, term, result: getEmptyPredictiveSearchResult()};
 
-  // Predictively search articles, collections, pages, products, and queries (suggestions)
+  // Predictively search collections, pages, products, and queries (suggestions)
   const {predictiveSearch: items, errors} = await storefront.query(
     PREDICTIVE_SEARCH_QUERY,
     {

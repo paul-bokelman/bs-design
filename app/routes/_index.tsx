@@ -59,11 +59,12 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
+      <div>content</div>
     </div>
   );
 }
+
+// todo: remove the following (below) after analysis
 
 function FeaturedCollection({
   collection,

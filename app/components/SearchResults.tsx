@@ -25,43 +25,9 @@ export function SearchResults({
   return children({...result.items, term});
 }
 
-SearchResults.Articles = SearchResultsArticles;
 SearchResults.Pages = SearchResultsPages;
 SearchResults.Products = SearchResultsProducts;
 SearchResults.Empty = SearchResultsEmpty;
-
-function SearchResultsArticles({
-  term,
-  articles,
-}: PartialSearchResult<'articles'>) {
-  if (!articles?.nodes.length) {
-    return null;
-  }
-
-  return (
-    <div className="search-result">
-      <h2>Articles</h2>
-      <div>
-        {articles?.nodes?.map((article) => {
-          const articleUrl = urlWithTrackingParams({
-            baseUrl: `/blogs/${article.handle}`,
-            trackingParams: article.trackingParameters,
-            term,
-          });
-
-          return (
-            <div className="search-results-item" key={article.id}>
-              <Link prefetch="intent" to={articleUrl}>
-                {article.title}
-              </Link>
-            </div>
-          );
-        })}
-      </div>
-      <br />
-    </div>
-  );
-}
 
 function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
   if (!pages?.nodes.length) {

@@ -5,10 +5,7 @@ import type {
   FooterQuery,
   HeaderQuery,
 } from 'storefrontapi.generated';
-import {Aside} from '~/components/Aside';
-import {Footer} from '~/components/Footer';
-import {Header, HeaderMenu} from '~/components/Header';
-import {CartMain} from '~/components/CartMain';
+import {Aside, Header, HeaderMenu, Footer, CartMain} from '~/components/layout';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -19,7 +16,6 @@ interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
   footer: Promise<FooterQuery | null>;
   header: HeaderQuery;
-  isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
   children?: React.ReactNode;
 }
@@ -29,7 +25,6 @@ export function PageLayout({
   children = null,
   footer,
   header,
-  isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
   return (
@@ -41,11 +36,10 @@ export function PageLayout({
         <Header
           header={header}
           cart={cart}
-          isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main>{children}</main>
+      <main className="px-12">{children}</main>
       <Footer
         footer={footer}
         header={header}
@@ -93,7 +87,7 @@ function SearchAside() {
 
         <SearchResultsPredictive>
           {({items, total, term, state, inputRef, closeSearch}) => {
-            const {articles, collections, pages, products, queries} = items;
+            const {collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
               return <div>Loading...</div>;
@@ -121,11 +115,6 @@ function SearchAside() {
                 />
                 <SearchResultsPredictive.Pages
                   pages={pages}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Articles
-                  articles={articles}
                   closeSearch={closeSearch}
                   term={term}
                 />

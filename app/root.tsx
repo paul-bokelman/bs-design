@@ -15,7 +15,7 @@ import favicon from '~/assets/favicon.svg';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
-import {PageLayout} from '~/components/PageLayout';
+import {PageLayout} from '~/components/layout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 
 export type RootLoader = typeof loader;
@@ -107,7 +107,7 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
 function loadDeferredData({context}: LoaderFunctionArgs) {
-  const {storefront, customerAccount, cart} = context;
+  const {storefront, cart} = context;
 
   // defer the footer query (below the fold)
   const footer = storefront
@@ -124,7 +124,6 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
     });
   return {
     cart: cart.get(),
-    isLoggedIn: customerAccount.isLoggedIn(),
     footer,
   };
 }
