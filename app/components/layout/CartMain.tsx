@@ -2,6 +2,7 @@ import {useOptimisticCart} from '@shopify/hydrogen';
 import {Link} from '@remix-run/react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside, CartLineItem, CartSummary} from '~/components/layout';
+import cn from 'classnames';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -23,19 +24,27 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const withDiscount =
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-  const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
   const cartHasItems = cart?.totalQuantity! > 0;
 
   return (
-    <div className={className}>
-      <CartEmpty hidden={linesCount} layout={layout} />
-      <div className="text-secondary">
-        <div aria-labelledby="cart-lines">
-          <ul>
+    <div className="flex flex-col h-full">
+      {!linesCount && <CartEmpty layout={layout} />}
+      <div className="flex flex-col h-full">
+        <div
+          aria-labelledby="cart-lines"
+          className="rounded-lg flex-grow overflow-y-auto"
+        >
+          <div
+            className={cn({
+              'flex flex-col h-full gap-4 pb-4': layout === 'aside',
+              'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4':
+                layout === 'page',
+            })}
+          >
             {(cart?.lines?.nodes ?? []).map((line) => (
               <CartLineItem key={line.id} line={line} layout={layout} />
             ))}
-          </ul>
+          </div>
         </div>
         {cartHasItems && <CartSummary cart={cart} layout={layout} />}
       </div>
@@ -43,22 +52,21 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   );
 }
 
-function CartEmpty({
-  hidden = false,
-}: {
-  hidden: boolean;
-  layout?: CartMainProps['layout'];
-}) {
+function CartEmpty({}: {layout?: CartMainProps['layout']}) {
   const {close} = useAside();
   return (
-    <div hidden={hidden}>
-      <br />
-      <p>
+    <div className="flex flex-col gap-2">
+      <span className="text-lg text-primary">Your cart is empty</span>
+      <p className="text-sm text-secondary">
         Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
         started!
       </p>
-      <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
+      <Link
+        className="text-sm text-secondary underline"
+        to="/collections"
+        onClick={close}
+        prefetch="viewport"
+      >
         Continue shopping →
       </Link>
     </div>

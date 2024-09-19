@@ -7,6 +7,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --header-height: 80px;
+  --footer-height: 80px;
+  --mobile-footer-height: 120px;
+}
+
 @layer base {
   h1 {
     font-size: 1.6rem;

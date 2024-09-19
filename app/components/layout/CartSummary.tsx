@@ -1,6 +1,7 @@
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from '~/components/layout';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
+import {Button} from '~/components/input';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -9,22 +10,21 @@ type CartSummaryProps = {
 
 export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
+    layout === 'page'
+      ? 'flex flex-col gap-4 justify-between flex-shrink-0 w-full pt-4 mt-4 text-secondary border-t border-secondary/30'
+      : 'flex flex-col gap-2 justify-between flex-shrink-0 w-full pt-4 pb-8 mt-4 text-secondary border-t border-secondary/30';
 
   return (
     <div aria-labelledby="cart-summary" className={className}>
-      <h4>Totals</h4>
-      <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
-          {cart.cost?.subtotalAmount?.amount ? (
-            <Money data={cart.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
-      </dl>
-      <CartDiscounts discountCodes={cart.discountCodes} />
+      <span className="text-secondary flex flex-row items-center gap-2">
+        Total:
+        {cart.cost?.subtotalAmount?.amount ? (
+          <Money data={cart.cost?.subtotalAmount} />
+        ) : (
+          '-'
+        )}
+      </span>
+      {/* <CartDiscounts discountCodes={cart.discountCodes} /> */}
       <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
     </div>
   );
@@ -33,12 +33,9 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
   if (!checkoutUrl) return null;
 
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
-      </a>
-      <br />
-    </div>
+    <a href={checkoutUrl} target="_self">
+      <Button size="sm">Continue to Checkout</Button>
+    </a>
   );
 }
 

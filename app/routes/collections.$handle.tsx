@@ -9,6 +9,8 @@ import {
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {ArrowLink, ProductCard} from '~/components';
+import {SearchX} from 'lucide-react';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
@@ -74,21 +76,32 @@ export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <PaginatedResourceSection
-        connection={collection.products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+    <div className="flex flex-col gap-8 my-8">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-primary my-0">{collection.title}</h1>
+        <p className="text-secondary text-sm">Showing 4 of 4 products</p>
+      </div>
+      {collection.products.nodes.length === 0 ? (
+        <div className="border border-secondary/30 rounded-md py-24 px-12 text-center flex flex-col w-full items-center justify-center gap-2">
+          <SearchX className="text-secondary" size={32} />
+          <div className="mt-4 flex flex-col justify-center items-center w-full">
+            <h2 className="text-primary text-xl">Collection Empty</h2>
+            <p className="text-secondary">
+              No products found in this collection. Please check again later.
+            </p>
+          </div>
+          <ArrowLink to="/collections" className="mt-4">
+            Back to Collections
+          </ArrowLink>
+        </div>
+      ) : (
+        <PaginatedResourceSection
+          connection={collection.products}
+          resourcesClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {({node: product, index}) => <ProductCard product={product} />}
+        </PaginatedResourceSection>
+      )}
       <Analytics.CollectionView
         data={{
           collection: {
@@ -98,39 +111,6 @@ export default function Collection() {
         }}
       />
     </div>
-  );
-}
-
-function ProductItem({
-  product,
-  loading,
-}: {
-  product: ProductItemFragment;
-  loading?: 'eager' | 'lazy';
-}) {
-  const variant = product.variants.nodes[0];
-  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
-  return (
-    <Link
-      className="product-item"
-      key={product.id}
-      prefetch="intent"
-      to={variantUrl}
-    >
-      {product.featuredImage && (
-        <Image
-          alt={product.featuredImage.altText || product.title}
-          aspectRatio="1/1"
-          data={product.featuredImage}
-          loading={loading}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h4>{product.title}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} />
-      </small>
-    </Link>
   );
 }
 

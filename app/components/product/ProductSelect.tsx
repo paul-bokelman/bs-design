@@ -20,7 +20,7 @@ export const ProductSelect: React.FC<ProductSelectProps> = ({option}) => {
               replace
               to={to}
             >
-              <Pill active={isActive} label={value} onClick={() => {}} />
+              <Pill active={isActive} label={value} />
             </Link>
           );
         })}

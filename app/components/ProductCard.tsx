@@ -1,42 +1,41 @@
 import {Link} from '@remix-run/react';
-import {CollectionFragment} from 'storefrontapi.generated';
-import {Image} from '@shopify/hydrogen';
+import {ProductItemFragment} from 'storefrontapi.generated';
+import {Image, Money} from '@shopify/hydrogen';
+import {useVariantUrl} from '~/lib/variants';
 
 interface ProductCardProps {
-    collection: CollectionFragment;
-    title: string;
-    category: string;
-    numberOfOptions: number;
-    price: string;
-    index: number;
+  product: ProductItemFragment;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({collection, category, numberOfOptions, price, index}) => {
-    return (
-      <Link
-        className='group'
-        key={collection.id}
-        to={`/collections/${collection.handle}`}
-        prefetch="intent"
-      >
-        {collection?.image && (
+export const ProductCard: React.FC<ProductCardProps> = ({product}) => {
+  const variant = product.variants.nodes[0];
+  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+  return (
+    <Link key={product.id} to={variantUrl} prefetch="intent">
+      <div className="w-full">
+        {product?.featuredImage && (
           <Image
-            alt={collection.image.altText || collection.title}
+            alt={product.featuredImage.altText || product.title}
             aspectRatio="1/1"
             className="rounded-xl group-hover:scale-[1.01] transition-all"
-            data={collection.image}
-            loading={index < 3 ? 'eager' : undefined}
+            data={product.featuredImage}
+            loading="eager"
           />
         )}
-        <div className="mt-4 flex flex-col">
-            <span className="text-secondary text-sm uppercase">{category}</span>
-            <h5 className="text-primary text-lg font-medium">Personalized Badge</h5>
-            <div className="flex items-center">
-              <span className="text-secondary text-sm">${price}</span>
-              <span className="text-secondary mx-1">•</span>
-              <span className="text-secondary text-sm">{numberOfOptions} options</span>
-            </div>
+      </div>
+      <div className="mt-4 flex flex-col">
+        <span className="text-secondary text-sm uppercase">
+          {product.title}
+        </span>
+        <h5 className="text-primary text-lg font-medium">{product.title}</h5>
+        <div className="flex items-center">
+          <span className="text-secondary text-sm">
+            <Money data={product.priceRange.minVariantPrice} />
+          </span>
+          <span className="text-secondary mx-1">•</span>
+          <span className="text-secondary text-sm">4 options</span>
         </div>
-      </Link>
-    );
-  }
+      </div>
+    </Link>
+  );
+};

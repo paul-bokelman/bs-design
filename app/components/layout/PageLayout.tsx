@@ -11,6 +11,7 @@ import {
   SearchFormPredictive,
 } from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {TextField} from '~/components/input';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -39,7 +40,9 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main className="px-12">{children}</main>
+      <main className="px-12 min-h-[calc(100vh-var(--header-height)-var(--mobile-footer-height))] lg:min-h-[calc(100vh-var(--header-height)-var(--footer-height))]">
+        {children}
+      </main>
       <Footer
         footer={footer}
         header={header}
@@ -51,7 +54,7 @@ export function PageLayout({
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
   return (
-    <Aside type="cart" heading="CART">
+    <Aside type="cart" heading="Cart">
       <Suspense fallback={<p>Loading cart ...</p>}>
         <Await resolve={cart}>
           {(cart) => {
@@ -65,23 +68,18 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 
 function SearchAside() {
   return (
-    <Aside type="search" heading="SEARCH">
-      <div className="predictive-search">
-        <br />
+    <Aside type="search" heading="Search">
+      <div className="h-full">
         <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
-            <>
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Search"
-                ref={inputRef}
-                type="search"
-              />
-              &nbsp;
-              <button onClick={goToSearch}>Search</button>
-            </>
+          {({fetchResults, inputRef}) => (
+            <TextField
+              name="q"
+              onChange={fetchResults}
+              onFocus={fetchResults}
+              placeholder="Search"
+              ref={inputRef}
+              type="search"
+            />
           )}
         </SearchFormPredictive>
 
@@ -98,11 +96,12 @@ function SearchAside() {
             }
 
             return (
-              <>
-                <SearchResultsPredictive.Queries
+              <div className="mt-4 flex flex-col gap-6">
+                {/* IGNORING SEARCH RESULTS FOR NOW */}
+                {/* <SearchResultsPredictive.Queries
                   queries={queries}
                   inputRef={inputRef}
-                />
+                /> */}
                 <SearchResultsPredictive.Products
                   products={products}
                   closeSearch={closeSearch}
@@ -113,12 +112,14 @@ function SearchAside() {
                   closeSearch={closeSearch}
                   term={term}
                 />
-                <SearchResultsPredictive.Pages
+                {/* IGNORING SEARCH RESULTS FOR NOW */}
+                {/* <SearchResultsPredictive.Pages
                   pages={pages}
                   closeSearch={closeSearch}
                   term={term}
-                />
-                {term.current && total ? (
+                /> */}
+                {/* Some BS your boy didn't feel like implementing */}
+                {/* {term.current && total ? (
                   <Link
                     onClick={closeSearch}
                     to={`${SEARCH_ENDPOINT}?q=${term.current}`}
@@ -128,8 +129,8 @@ function SearchAside() {
                       &nbsp; →
                     </p>
                   </Link>
-                ) : null}
-              </>
+                ) : null} */}
+              </div>
             );
           }}
         </SearchResultsPredictive>

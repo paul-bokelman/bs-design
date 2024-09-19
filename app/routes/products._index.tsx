@@ -19,13 +19,17 @@ export async function loader(args: LoaderFunctionArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context, request}: LoaderFunctionArgs) {
+async function loadCriticalData({
+  context,
+  request,
+  params,
+}: LoaderFunctionArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
   });
 
   const [{collections}] = await Promise.all([
-    context.storefront.query(COLLECTIONS_QUERY, {
+    context.storefront.query(PRODUCTS_QUERY, {
       variables: paginationVariables,
     }),
     // Add other queries here, so that they are loaded in parallel
@@ -45,6 +49,7 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 
 export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
+
   const [activePills, setActivePills] = React.useState<string[]>(['Glass']);
 
   const testPills = [
@@ -80,7 +85,7 @@ export default function Collections() {
   };
 
   return (
-    <div className="collections">
+    <div>
       <h1 className="text-primary">Products</h1>
       <div className="flex flex-row gap-2 w-full overflow-x-scroll">
         {testPills.map((pill) => (
@@ -113,20 +118,26 @@ export default function Collections() {
   );
 }
 
-const COLLECTIONS_QUERY = `#graphql
-  fragment Collection on Collection {
+const PRODUCTS_QUERY = `#graphql
+  fragment TestProduct on Collection {
     id
-    title
     handle
-    image {
-      id
-      url
-      altText
-      width
-      height
+    products(first: 10) {
+      edges {
+        node {
+          title
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
     }
   }
-  query StoreCollections(
+
+  query StoreProducts(
     $country: CountryCode
     $endCursor: String
     $first: Int
@@ -141,7 +152,7 @@ const COLLECTIONS_QUERY = `#graphql
       after: $endCursor
     ) {
       nodes {
-        ...Collection
+        ...TestProduct
       }
       pageInfo {
         hasNextPage

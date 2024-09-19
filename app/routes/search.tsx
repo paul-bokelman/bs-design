@@ -3,7 +3,7 @@ import {
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
 } from '@shopify/remix-oxygen';
-import {useLoaderData, type MetaFunction} from '@remix-run/react';
+import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
 import {SearchResults} from '~/components/SearchResults';
@@ -12,6 +12,7 @@ import {
   type PredictiveSearchReturn,
   getEmptyPredictiveSearchResult,
 } from '~/lib/search';
+import {Button} from '~/components/input';
 
 export const meta: MetaFunction = () => {
   return [{title: `Hydrogen | Search`}];
@@ -40,38 +41,49 @@ export default function SearchPage() {
   if (type === 'predictive') return null;
 
   return (
-    <div className="search">
-      <h1>Search</h1>
-      <SearchForm>
-        {({inputRef}) => (
-          <>
-            <input
-              defaultValue={term}
-              name="q"
-              placeholder="Search…"
-              ref={inputRef}
-              type="search"
-            />
-            &nbsp;
-            <button type="submit">Search</button>
-          </>
-        )}
-      </SearchForm>
-      {error && <p style={{color: 'red'}}>{error}</p>}
-      {!term || !result?.total ? (
-        <SearchResults.Empty />
-      ) : (
-        <SearchResults result={result} term={term}>
-          {({pages, products, term}) => (
-            <div>
-              <SearchResults.Products products={products} term={term} />
-              <SearchResults.Pages pages={pages} term={term} />
-            </div>
-          )}
-        </SearchResults>
-      )}
-      <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
+    <div className="flex flex-col items-center justify-center mt-32">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <h1 className="text-4xl text-primary font-bold">This is awkward...</h1>
+        <p className="text-secondary">
+          Search page is currently under maintenance, check back soon!
+        </p>
+        <Link to="/" className="text-secondary underline">
+          Go home →
+        </Link>
+      </div>
     </div>
+    // <div className="search">
+    //   <h1>Search</h1>
+    //   <SearchForm>
+    //     {({inputRef}) => (
+    //       <>
+    //         <input
+    //           defaultValue={term}
+    //           name="q"
+    //           placeholder="Search…"
+    //           ref={inputRef}
+    //           type="search"
+    //         />
+    //         &nbsp;
+    //         <button type="submit">Search</button>
+    //       </>
+    //     )}
+    //   </SearchForm>
+    //   {error && <p style={{color: 'red'}}>{error}</p>}
+    //   {!term || !result?.total ? (
+    //     <SearchResults.Empty />
+    //   ) : (
+    //     <SearchResults result={result} term={term}>
+    //       {({pages, products, term}) => (
+    //         <div>
+    //           <SearchResults.Products products={products} term={term} />
+    //           <SearchResults.Pages pages={pages} term={term} />
+    //         </div>
+    //       )}
+    //     </SearchResults>
+    //   )}
+    //   <Analytics.SearchView data={{searchTerm: term, searchResults: result}} />
+    // </div>
   );
 }
 

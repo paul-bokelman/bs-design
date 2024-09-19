@@ -76,9 +76,7 @@ async function loadCriticalData({
     }
   }
 
-  return {
-    product,
-  };
+  return {product};
 }
 
 /**
@@ -141,11 +139,11 @@ export default function Product() {
     <div className="w-full lg:h-[36rem] flex justify-center items-center mb-12 lg:mb-0">
       <div className="flex flex-col gap-6 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          to="/products"
+          to="/collections"
           className="text-secondary flex flex-row gap-1 items-center"
         >
           <ChevronLeftIcon className="w-4 h-4" />
-          <span className="text-sm">Back to Products</span>
+          <span className="text-sm">Back to Collections</span>
         </Link>
         <div className="block lg:hidden">
           <ProductTitlePartial
@@ -155,22 +153,22 @@ export default function Product() {
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
         </div>
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center justify-center h-full lg:h-[25rem]">
-          <div className="flex flex-col lg:flex-row items-center gap-2 h-full w-full lg:w-auto">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center justify-center h-full md:h-full lg:h-[25rem]">
+          <div className="flex flex-col md:flex-row items-center gap-2 h-full w-full lg:w-auto">
             {/* large screen size */}
-            <div className="hidden lg:flex flex-col gap-2 h-full overflow-y-auto no-scrollbar rounded-md">
+            <div className="hidden md:flex flex-col gap-2 lg:h-full overflow-y-auto no-scrollbar rounded-md md:h-[30rem]">
               {Array.from({length: 12}).map((_, index) => (
                 <div key={index} className="h-16 w-16">
                   <ProductImage image={selectedVariant?.image} />
                 </div>
               ))}
             </div>
-            <div className="block lg:hidden absolute h-[30rem] w-[calc(100%-96px)] bg-white rounded-lg" />
-            <div className="relative max-h-[30rem] lg:h-full max-w-[30rem] lg:max-w-auto lg:max-h-auto lg:w-auto">
+            {/* <div className="block lg:hidden absolute h-[30rem] w-[calc(100%-96px)] bg-white rounded-lg" /> */}
+            <div className="relative w-full md:h-[30rem] lg:h-full md:max-w-auto md:max-h-auto md:w-auto">
               <ProductImage image={selectedVariant?.image} />
             </div>
-            {/* below large screen size */}
-            <div className="flex mt-4 lg:hidden flex-row gap-2 w-full overflow-x-auto rounded-md">
+            {/* below medium screen size */}
+            <div className="flex mt-4 md:hidden flex-row gap-2 w-full overflow-x-auto rounded-md">
               <div className="flex flex-nowrap gap-2">
                 {Array.from({length: 12}).map((_, index) => (
                   <div key={index} className="h-16 w-16 flex-shrink-0">

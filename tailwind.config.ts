@@ -9,6 +9,11 @@ export default {
         sans: ['Geist', ...defaultTheme.fontFamily.sans],
         mono: ['Geist', ...defaultTheme.fontFamily.mono],
       },
+      height: {
+        header: 'var(--header-height)',
+        footer: 'var(--footer-height)',
+        'mobile-footer': 'var(--mobile-footer-height)',
+      },
       colors: {
         primary: '#FFF7E6',
         'primary-faded': '#FFF7E660',

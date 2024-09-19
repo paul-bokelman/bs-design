@@ -1,4 +1,6 @@
 import {createContext, type ReactNode, useContext, useState} from 'react';
+import cn from 'classnames';
+import {X} from 'lucide-react';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -32,18 +34,38 @@ export function Aside({
   return (
     <div
       aria-modal
-      className={`overlay ${expanded ? 'expanded' : ''}`}
+      className={cn(
+        'fixed inset-0 z-[50] bg-black bg-opacity-20 transition-opacity duration-400 ease-in-out',
+        {
+          'opacity-100 pointer-events-auto visible': expanded,
+          'opacity-0 pointer-events-none invisible': !expanded,
+        },
+      )}
       role="dialog"
     >
-      <button className="close-outside" onClick={close} />
-      <aside>
-        <header>
-          <h3>{heading}</h3>
-          <button className="close reset" onClick={close}>
-            &times;
-          </button>
+      <button
+        className="absolute inset-0 w-[calc(100%-var(--aside-width))] bg-transparent border-none text-transparent"
+        onClick={close}
+      />
+      <aside
+        className={cn(
+          'bg-black/60 backdrop-blur-xl border-l border-secondary/30 rounded-l-xl shadow-[0_0_50px_rgba(0,0,0,0.3)] h-screen max-w-[var(--aside-width)] min-w-[var(--aside-width)] fixed top-0 right-[calc(-1*var(--aside-width))] transition-transform duration-200 ease-in-out',
+          {
+            'translate-x-[calc(var(--aside-width)*-1)]': expanded,
+          },
+        )}
+      >
+        <header className="flex items-center justify-between h-[var(--header-height)] border-b border-[var(--color-dark)] px-5">
+          <h3 className="m-0 text-secondary">{heading}</h3>
+          <X
+            className="text-secondary/80 cursor-pointer hover:text-primary hover:scale-[1.02] transition-all"
+            onClick={close}
+            size={20}
+          />
         </header>
-        <main>{children}</main>
+        <main className="mt-2 h-[calc(100%-var(--header-height))]">
+          {children}
+        </main>
       </aside>
     </div>
   );

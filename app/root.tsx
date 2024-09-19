@@ -17,6 +17,7 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from '~/components/layout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
+import {ArrowLink} from '~/components';
 
 export type RootLoader = typeof loader;
 
@@ -176,14 +177,17 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
+    <div className="flex flex-col items-center justify-center mt-32">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <h1 className="text-4xl text-primary font-bold">
+          {errorStatus === 404 ? 'Page not found' : 'Something went wrong...'}
+        </h1>
+        <p className="text-secondary">
+          {errorMessage ||
+            'An unexpected error occurred, please try again later.'}
+        </p>
+        <ArrowLink to="/">Back Home</ArrowLink>
+      </div>
     </div>
   );
 }

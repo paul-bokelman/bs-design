@@ -1,6 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
-import {Await, NavLink} from '@remix-run/react';
+import {Await, NavLink, useMatches} from '@remix-run/react';
 import {type CartViewPayload, useAnalytics} from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
@@ -14,11 +14,10 @@ interface HeaderProps {
 
 type Viewport = 'desktop' | 'mobile';
 
-
 export function Header({header, cart, publicStoreDomain}: HeaderProps) {
   const {shop, menu} = header;
   return (
-    <header className="bg-gradient-to-b from-black to-black/80 flex items-center px-12 py-6 sticky top-0 z-[3] h-full rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[6px]">
+    <header className="bg-gradient-to-b from-black to-black/80 flex items-center px-12 h-header sticky top-0 z-[3] rounded-b-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[6px]">
       <NavLink prefetch="intent" to="/" className={activeLinkStyle} end>
         <img src="bs-logo.png" alt="BS Logo" height={50} width={50} />
       </NavLink>
@@ -53,8 +52,8 @@ export function HeaderMenu({
     }
   }
 
-  // const displayedMenu = menu || FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
-  const displayedMenu = FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
+  const displayedMenu = menu || FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
+  // const displayedMenu = FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
 
   return (
     <nav className={className} role="navigation">
@@ -82,7 +81,7 @@ export function HeaderMenu({
 
         return (
           <NavLink
-            className='cursor-pointer text-secondary hover:text-primary hover:scale-[1.02] transition-all'
+            className="cursor-pointer text-secondary hover:text-primary hover:scale-[1.02] transition-all"
             end
             key={item.id}
             onClick={closeAside}
@@ -114,27 +113,54 @@ function HeaderMenuMobileToggle() {
   const handleClick = () => {
     setIsOpen(!isOpen);
     document.body.style.overflow = isOpen ? 'auto' : 'hidden';
-  }
+  };
+
+  const matches = useMatches();
 
   return (
     <>
-    {isOpen && (
-        <div className='fixed inset-0 w-screen h-screen bg-black/95 z-[30] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[30px]'>
-          <div className='relative w-full h-full px-12 py-6'>
-            <div className='w-full flex justify-between'>
+      {isOpen && (
+        <div className="fixed inset-0 w-screen h-screen bg-black/95 z-[30] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[30px]">
+          <div className="relative w-full h-full px-12 py-[1.85rem]">
+            <div className="w-full flex justify-between">
               <NavLink prefetch="intent" to="/" end>
                 <img src="bs-logo.png" alt="BS Logo" height={50} width={50} />
               </NavLink>
-              <X className='text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all' size={28} onClick={handleClick} />
-            </div> 
-          <div className='mt-12 w-full min-h-64 max-h-[calc(100%-15rem)] flex flex-col items-center justify-center'>
-            <div className='flex flex-col items-start gap-8'>
-              {[{title: 'Products', url: '/products', active: true}, {title: 'Cart', url: '/cart', active: false}, {title: 'Search', url: '/search', active: false}].map((item) => (
+              <X
+                className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all"
+                size={28}
+                onClick={handleClick}
+              />
+            </div>
+            <div className="mt-12 w-full min-h-64 max-h-[calc(100%-15rem)] flex flex-col items-center justify-center">
+              <div className="flex flex-col items-start gap-8">
+                {[
+                  {
+                    title: 'Home',
+                    url: '/',
+                    active: matches[1].id === 'routes/_index',
+                  },
+                  {
+                    title: 'Collections',
+                    url: '/collections',
+                    active: matches[1].id.includes('collections'),
+                  },
+                  {
+                    title: 'Cart',
+                    url: '/cart',
+                    active: matches[1].id.includes('cart'),
+                  },
+                  // {title: 'Search', url: '/search', active: false},
+                ].map((item) => (
                   <NavLink
-                    className={cn('cursor-pointer hover:text-primary hover:scale-[1.02] hover:font-bold transition-all text-5xl', {
-                      'text-primary font-bold': item.active,
-                      'text-secondary font-semibold': !item.active,
-                    })}
+                    key={item.title}
+                    className={cn(
+                      'cursor-pointer hover:text-primary hover:scale-[1.02] hover:font-bold transition-all text-5xl',
+                      {
+                        'text-primary font-bold': item.active,
+                        'text-secondary font-semibold': !item.active,
+                      },
+                    )}
                     end
                     prefetch="intent"
                     to={item.url}
@@ -142,18 +168,18 @@ function HeaderMenuMobileToggle() {
                   >
                     {item.title}
                   </NavLink>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-    </div>
-    )}
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={handleClick}
-    >
-      <MenuIcon className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all" size={28} />
-    </button>
+      )}
+      <button className="header-menu-mobile-toggle reset" onClick={handleClick}>
+        <MenuIcon
+          className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all"
+          size={28}
+        />
+      </button>
     </>
   );
 }
@@ -161,7 +187,11 @@ function HeaderMenuMobileToggle() {
 function SearchToggle() {
   const {open} = useAside();
   return (
-    <Search className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all" size={28} onClick={() => open('search')} />
+    <Search
+      className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all"
+      size={28}
+      onClick={() => open('search')}
+    />
   );
 }
 
@@ -184,10 +214,15 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload);
       }}
     >
-      <ShoppingCart className="relative text-secondary hover:text-primary hover:scale-110 transition-all" size={28} />
-      <div className="absolute top-0 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-400 flex items-center justify-center">
-        <span className="text-xs text-black">{count}</span>
-      </div>
+      <ShoppingCart
+        className="relative text-secondary hover:text-primary hover:scale-110 transition-all"
+        size={28}
+      />
+      {count ? (
+        <div className="absolute top-0 -right-1.5 w-3.5 h-3.5 rounded-full bg-red-400 flex items-center justify-center">
+          <span className="text-xs text-black">{count}</span>
+        </div>
+      ) : null}
     </a>
   );
 }
@@ -212,9 +247,9 @@ const FALLBACK_HEADER_MENU = {
       id: 'gid://shopify/MenuItem/461609500728',
       resourceId: null,
       tags: [],
-      title: 'Products',
+      title: 'Collections',
       type: 'HTTP',
-      url: '/products',
+      url: '/collections',
       items: [],
     },
   ],

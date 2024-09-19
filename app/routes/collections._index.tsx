@@ -1,8 +1,9 @@
-import {useLoaderData, Link} from '@remix-run/react';
+import React from 'react';
+import {useLoaderData} from '@remix-run/react';
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
-import type {CollectionFragment} from 'storefrontapi.generated';
+import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {CollectionCard} from '~/components';
 
 export async function loader(args: LoaderFunctionArgs) {
   // Start fetching non-critical data without blocking time to first byte
@@ -18,7 +19,11 @@ export async function loader(args: LoaderFunctionArgs) {
  * Load data necessary for rendering content above the fold. This is the critical data
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
-async function loadCriticalData({context, request}: LoaderFunctionArgs) {
+async function loadCriticalData({
+  context,
+  request,
+  params,
+}: LoaderFunctionArgs) {
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 4,
   });
@@ -46,64 +51,28 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
+    <div className="collection">
+      <h1 className="text-primary">Collections</h1>
+      <p className="text-secondary text-sm my-4">Showing 4 of 4 collections</p>
       <PaginatedResourceSection
         connection={collections}
         resourcesClassName="collections-grid"
       >
         {({node: collection, index}) => (
-          <CollectionItem
-            key={collection.id}
-            collection={collection}
-            index={index}
-          />
+          <CollectionCard collection={collection} />
         )}
       </PaginatedResourceSection>
     </div>
   );
 }
 
-function CollectionItem({
-  collection,
-  index,
-}: {
-  collection: CollectionFragment;
-  index: number;
-}) {
-  return (
-    <Link
-      className="collection-item"
-      key={collection.id}
-      to={`/collections/${collection.handle}`}
-      prefetch="intent"
-    >
-      {collection?.image && (
-        <Image
-          alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
-          data={collection.image}
-          loading={index < 3 ? 'eager' : undefined}
-        />
-      )}
-      <h5>{collection.title}</h5>
-    </Link>
-  );
-}
-
 const COLLECTIONS_QUERY = `#graphql
   fragment Collection on Collection {
     id
-    title
     handle
-    image {
-      id
-      url
-      altText
-      width
-      height
-    }
+    title
   }
+
   query StoreCollections(
     $country: CountryCode
     $endCursor: String
