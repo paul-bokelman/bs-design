@@ -24,7 +24,7 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({collection}) => {
           loading="eager"
         />
       )}
-      <div className="absolute z-[3] bg-black/85 px-12 pt-20 pb-8 left-0 bottom-0 h-full w-full flex justify-center ">
+      <div className="absolute z-[2] bg-black/85 px-12 pt-20 pb-8 left-0 bottom-0 h-full w-full flex justify-center ">
         <div className="relative flex justify-between h-full">
           <div className="flex flex-col gap-2">
             <h3 className="text-primary font-bold text-xl uppercase">
