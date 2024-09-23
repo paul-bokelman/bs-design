@@ -51,9 +51,9 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
+    <div className="flex flex-col gap-0">
       <h1 className="text-primary">Collections</h1>
-      <p className="text-secondary text-sm my-4">Showing 4 of 4 collections</p>
+      <p className="text-secondary text-sm mb-4">Showing 4 of 4 collections</p>
       <PaginatedResourceSection
         connection={collections}
         resourcesClassName="collections-grid"
@@ -70,6 +70,14 @@ const COLLECTIONS_QUERY = `#graphql
   fragment Collection on Collection {
     id
     handle
+    description
+    image {
+      id
+      altText
+      url
+      width
+      height
+    }
     title
   }
 

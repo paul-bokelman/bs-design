@@ -17,7 +17,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   return (
     <div aria-labelledby="cart-summary" className={className}>
       <span className="text-secondary flex flex-row items-center gap-2">
-        Total:
+        Subtotal:
         {cart.cost?.subtotalAmount?.amount ? (
           <Money data={cart.cost?.subtotalAmount} />
         ) : (
@@ -34,7 +34,9 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
 
   return (
     <a href={checkoutUrl} target="_self">
-      <Button size="sm">Continue to Checkout</Button>
+      <Button size="sm" className="w-full">
+        Continue to Checkout
+      </Button>
     </a>
   );
 }

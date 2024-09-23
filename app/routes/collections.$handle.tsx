@@ -76,11 +76,9 @@ export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex flex-col gap-8 my-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-primary my-0">{collection.title}</h1>
-        <p className="text-secondary text-sm">Showing 4 of 4 products</p>
-      </div>
+    <div className="flex flex-col gap-0">
+      <h1 className="text-primary">{collection.title}</h1>
+      <p className="text-secondary text-sm mb-4">Showing 4 of 4 products</p>
       {collection.products.nodes.length === 0 ? (
         <div className="border border-secondary/30 rounded-md py-24 px-12 text-center flex flex-col w-full items-center justify-center gap-2">
           <SearchX className="text-secondary" size={32} />
