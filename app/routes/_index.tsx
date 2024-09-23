@@ -51,7 +51,7 @@ export default function Homepage() {
       <ArrowLink to="/collections" className="mt-8">
         Explore Collections
       </ArrowLink>
-      <div className="relative w-[calc(100vw+80px)] mt-24 grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="relative w-[calc(100dvw+80px)] mt-24 grid grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="absolute w-full h-full bg-gradient-to-b from-black via-transparent to-black z-[2]" />
         {Array.from({length: 10}).map((_, index) => (
           <Link key={index} to="/collections" className="relative group">
