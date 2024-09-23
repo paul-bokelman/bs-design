@@ -5,6 +5,7 @@ import {type CartViewPayload, useAnalytics} from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
 import {MenuIcon, Search, ShoppingCart, X} from 'lucide-react';
+import logo from '~/assets/bs-logo.png';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -19,7 +20,7 @@ export function Header({header, cart, publicStoreDomain}: HeaderProps) {
   return (
     <header className="bg-gradient-to-b from-black to-black/80 flex items-center px-12 h-header sticky top-0 z-[3] rounded-b-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[6px]">
       <NavLink prefetch="intent" to="/" className={activeLinkStyle} end>
-        <img src="bs-logo.png" alt="BS Logo" height={50} width={50} />
+        <img src={logo} alt="BS Logo" height={50} width={50} />
       </NavLink>
       <HeaderMenu
         menu={menu}
@@ -124,7 +125,7 @@ function HeaderMenuMobileToggle() {
           <div className="relative w-full h-full px-12 py-[1.85rem]">
             <div className="w-full flex justify-between">
               <NavLink prefetch="intent" to="/" end>
-                <img src="bs-logo.png" alt="BS Logo" height={50} width={50} />
+                <img src={logo} alt="BS Logo" height={50} width={50} />
               </NavLink>
               <X
                 className="text-secondary cursor-pointer hover:text-primary hover:scale-110 transition-all"

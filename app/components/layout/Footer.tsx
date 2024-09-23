@@ -1,6 +1,7 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from '@remix-run/react';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
+import logo from '~/assets/bs-logo.png';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -49,7 +50,7 @@ function FooterMenu({
       <div className="flex flex-col lg:flex-row w-full justify-between">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-2 mb-4 lg:mb-0">
           <img
-            src="bs-logo.png"
+            src={logo}
             alt="BS Logo"
             height={40}
             width={40}

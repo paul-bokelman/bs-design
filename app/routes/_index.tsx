@@ -2,6 +2,8 @@ import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {type MetaFunction, useLoaderData, Link} from '@remix-run/react';
 import {ArrowRight} from 'lucide-react';
 import {ArrowLink} from '~/components';
+import logo from '~/assets/bs-logo.png';
+import galleryImage from '~/assets/gallery-image.jpg';
 
 export const meta: MetaFunction = () => {
   return [{title: 'BS Design'}];
@@ -38,7 +40,7 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="relative flex flex-col items-center justify-center h-full w-full mt-28">
-      <img src="bs-logo.png" alt="BS Logo" height={150} width={150} />
+      <img src={logo} alt="BS Logo" height={150} width={150} />
       <h1 className="text-primary uppercase text-sm font-medium">
         Beth-Shannon Design
       </h1>
@@ -54,8 +56,8 @@ export default function Homepage() {
         {Array.from({length: 10}).map((_, index) => (
           <Link key={index} to="/collections" className="relative group">
             <img
-              src="gallary-image.jpg"
-              alt="Gallary"
+              src={galleryImage}
+              alt="Gallery"
               className="bg-secondary/10 rounded-md h-60 w-full object-cover"
             />
             <div className="absolute bottom-0 left-0 w-full h-full bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-8">
