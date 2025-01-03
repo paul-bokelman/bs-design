@@ -50,8 +50,10 @@ async function loadCriticalData({
       variables: {
         handle,
         first: numberOfProducts,
+        // @ts-ignore
         filters,
       },
+      storefrontApiVersion: '2025-01', // so fucking stupid, don't even get me started on this
     }),
     storefront.query(queries.CollectionTotalProducts, {variables: {handle}}),
     storefront.query(queries.CollectionFilters, {variables: {handle}}),
@@ -104,20 +106,17 @@ export default function Products() {
     setIsLoading(false);
   }, [collection]);
 
-  if (collection.products.nodes.length === 0) {
-    return (
-      <div className="flex flex-col">
-        <h1 className="text-primary capitalize">{handle} Collection</h1>
-        <p className="text-secondary text-sm">
-          Showing 0 of {totalProducts} products
-        </p>
+  const query = new URLSearchParams(location.search);
 
-        <p className="text-secondary mt-12">
-          This collection is empty, please try again later
-        </p>
-      </div>
-    );
-  }
+  const activeFilters = query.getAll('filters');
+
+  const handleClearFilter = () => {
+    query.delete('filters');
+    navigate(`${location.pathname}?${query.toString()}`, {
+      replace: true,
+      preventScrollReset: true,
+    });
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -133,34 +132,49 @@ export default function Products() {
         Showing {collection.products.nodes.length} of {totalProducts} products
       </p>
 
-      <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-x-6 gap-y-12">
-        {collection.products.nodes.map((product) => (
-          <ProductPreview
-            key={product.id}
-            collectionHandle={handle}
-            product={product}
-          />
-        ))}
-      </div>
+      {collection.products.nodes.length !== 0 ? (
+        <>
+          <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-x-6 gap-y-12">
+            {collection.products.nodes.map((product) => (
+              <ProductPreview
+                key={product.id}
+                collectionHandle={handle}
+                product={product}
+              />
+            ))}
+          </div>
 
-      <div className="flex w-full justify-center items-center mt-12 mb-6">
-        {collection.products.pageInfo.hasNextPage ? (
-          <Button
-            variant="primary"
-            onClick={async () => await handleLoadMore()}
-            disabled={!collection.products.pageInfo.hasNextPage || isLoading}
-            loading={isLoading}
-            loadingText="Loading..."
-          >
-            Load More
-          </Button>
-        ) : (
-          <p className="text-secondary text-sm mb-4">
-            Loaded {collection.products.nodes.length} of {totalProducts}{' '}
-            products
+          <div className="flex w-full justify-center items-center mt-12 mb-6">
+            {collection.products.pageInfo.hasNextPage ? (
+              <Button
+                variant="primary"
+                onClick={async () => await handleLoadMore()}
+                disabled={
+                  !collection.products.pageInfo.hasNextPage || isLoading
+                }
+                loading={isLoading}
+                loadingText="Loading..."
+              >
+                Load More
+              </Button>
+            ) : (
+              <p className="text-secondary text-sm mb-4">
+                Loaded {collection.products.nodes.length} of {totalProducts}{' '}
+                products
+              </p>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2 mt-24">
+          <p className="text-secondary">
+            No products found{' '}
+            {activeFilters.length > 0
+              ? 'try clearing your filter.'
+              : 'please check in later.'}
           </p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

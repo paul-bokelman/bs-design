@@ -15,38 +15,37 @@ import {useLocation, useNavigate} from '@remix-run/react';
 type FilterModalProps = {
   isOpen: boolean;
   closeModal: () => void;
+  setActiveFilters: (count: number) => void;
 } & CollectionFilterFragment;
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   isOpen,
-  closeModal,
   filters,
+  closeModal: closeModalExternal,
+  setActiveFilters,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedFilters, setSelectedFilters] = React.useState<
-    {id: string; value: string}[]
-  >([]);
+  const [selectedFilters, setSelectedFilters] = React.useState<string[]>([]);
 
-  const handleToggleFilter = (
-    baseId: string,
-    filter: {id: string; value: string},
-  ) => {
-    // filter is already included -> remove it and return
-    if (selectedFilters.find((f) => f.id === filter.id)) {
-      setSelectedFilters(
-        selectedFilters.filter((item) => item.id !== filter.id),
-      );
-      return;
-      // filter doesn't exist but baseId exists -> remove all filters with baseId
-    } else if (selectedFilters.find((f) => f.id.includes(baseId))) {
-      setSelectedFilters([
-        ...selectedFilters.filter((item) => !item.id.includes(baseId)),
-        filter,
-      ]);
+  const forceCurrentState = () => {
+    const currentParams = new URLSearchParams(location.search);
+    const filterParams = currentParams.getAll('filters');
+    setSelectedFilters(filterParams);
+  };
+
+  const closeModal = (excludeForce = false) => {
+    if (!excludeForce) {
+      forceCurrentState();
+    }
+    closeModalExternal();
+  };
+
+  const handleToggleFilter = (filter: string) => {
+    if (selectedFilters.includes(filter)) {
+      setSelectedFilters(selectedFilters.filter((f) => f !== filter));
     } else {
-      // filter doesn't exist and baseId doesn't exist -> add the new filter
       setSelectedFilters([...selectedFilters, filter]);
     }
   };
@@ -59,9 +58,9 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     } else {
       selectedFilters.forEach((filter, i) => {
         if (i == 0) {
-          currentParams.set('filters', filter.value);
+          currentParams.set('filters', filter);
         } else {
-          currentParams.append('filters', filter.value);
+          currentParams.append('filters', filter);
         }
       });
     }
@@ -72,7 +71,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     });
 
     if (!clear) {
-      closeModal();
+      closeModal(true);
     }
   };
 
@@ -80,6 +79,14 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     setSelectedFilters([]);
     handleApplyFilter(true);
   };
+
+  React.useEffect(() => {
+    setActiveFilters(selectedFilters.length);
+  }, [selectedFilters, setActiveFilters]);
+
+  React.useEffect(() => {
+    forceCurrentState();
+  }, []);
 
   return (
     <Dialog open={isOpen} onClose={closeModal} className="relative z-10">
@@ -96,7 +103,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           >
             <div className="border-b border-secondary-border w-full grid grid-cols-3 pb-3 px-8">
               <div className="cursor-pointer flex box-content w-fit items-center p-[7px] rounded-full border border-transparent hover:border-black-60/50 transition-colors">
-                <X className="text-lg" onClick={closeModal} />
+                <X className="text-lg" onClick={() => closeModal()} />
               </div>
               <p className="font-semibold w-full flex justify-center items-center text-primary">
                 Products Filter
@@ -129,11 +136,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
 const FilterSection: React.FC<{
   filter: CollectionFilterFragment['filters'][number];
-  selectedFilters: {id: string; value: string}[];
-  handleToggleFilter: (
-    baseId: string,
-    filters: {id: string; value: string},
-  ) => void;
+  selectedFilters: string[];
+  handleToggleFilter: (filter: string) => void;
 }> = ({filter, selectedFilters, handleToggleFilter}) => {
   return (
     <div className="flex flex-col gap-1">
@@ -142,7 +146,7 @@ const FilterSection: React.FC<{
       </h2>
       <div className="flex flex-wrap gap-2">
         {filter.values.map((value) => {
-          const active = selectedFilters.find((f) => f.id === value.id);
+          const active = selectedFilters.includes(value.input as string);
 
           return (
             <button
@@ -155,12 +159,7 @@ const FilterSection: React.FC<{
                     !active,
                 },
               )}
-              onClick={() =>
-                handleToggleFilter(filter.id, {
-                  id: value.id,
-                  value: value.input as string,
-                })
-              }
+              onClick={() => handleToggleFilter(value.input as string)}
             >
               {active && <span className="h-2 w-2 bg-primary rounded-full" />}
               <span>

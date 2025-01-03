@@ -1,6 +1,5 @@
 import React from 'react';
 import type {CollectionFilterFragment} from 'storefrontapi.generated';
-import {useLocation, useNavigate} from '@remix-run/react';
 import {Button} from '~/components/input';
 import {Filter} from 'lucide-react';
 import {FilterModal} from '~/components/modals';
@@ -8,64 +7,30 @@ import {FilterModal} from '~/components/modals';
 type ProductsFilterProps = CollectionFilterFragment;
 
 export const ProductsFilter: React.FC<ProductsFilterProps> = ({filters}) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
   const [showFiltersModal, setShowFiltersModal] = React.useState(false);
-
-  // const handleSelection = (title: string) => {
-  //   setIsLoading(true);
-  //   if (selectedTypes.includes(title)) {
-  //     setSelectedTypes(selectedTypes.filter((item) => item !== title));
-  //   } else {
-  //     setSelectedTypes([...selectedTypes, title]);
-  //   }
-  // };
-
-  // React.useEffect(() => {
-  //   const currentParams = new URLSearchParams(location.search);
-
-  //   if (selectedTypes.length === 0) {
-  //     currentParams.delete('types');
-  //   } else {
-  //     currentParams.set('types', selectedTypes[0]);
-  //     for (let i = selectedTypes.length - 1; i > 0; i--) {
-  //       currentParams.append('types', selectedTypes[i]);
-  //     }
-  //   }
-
-  //   navigate(`${location.pathname}?${currentParams.toString()}`, {
-  //     replace: true,
-  //     preventScrollReset: true,
-  //   });
-
-  //   setIsLoading(false);
-  // }, [selectedTypes]);
-
-  // React.useEffect(() => {
-  //   const params = new URLSearchParams(location.search);
-  //   const types = params.getAll('types');
-  //   if (types) {
-  //     setSelectedTypes(types);
-  //   }
-  // }, []);
+  const [activeFilters, setActiveFilters] = React.useState<number>(0);
 
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button
-          icon={Filter}
-          variant="secondary"
-          loading={isLoading}
-          onClick={() => setShowFiltersModal(true)}
-        >
-          Filters
-        </Button>
+        <div className="relative">
+          <Button
+            icon={Filter}
+            variant="secondary"
+            onClick={() => setShowFiltersModal(true)}
+          >
+            Filters
+          </Button>
+          {activeFilters > 0 && (
+            <div className="absolute flex justify-center items-center -top-1 -right-1 bg-primary h-4 w-4 rounded-full">
+              <span className="text-black text-xs">{activeFilters}</span>
+            </div>
+          )}
+        </div>
       </div>
       <FilterModal
         isOpen={showFiltersModal}
+        setActiveFilters={setActiveFilters}
         filters={filters}
         closeModal={() => setShowFiltersModal(false)}
       />

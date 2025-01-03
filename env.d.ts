@@ -16,7 +16,14 @@ declare global {
   /**
    * A global `process` object is only available during build to access NODE_ENV.
    */
-  const process: {env: {NODE_ENV: 'production' | 'development'}};
+  const process: {
+    env: {
+      NODE_ENV: 'production' | 'development';
+      PUBLIC_STORE_DOMAIN: string;
+      PUBLIC_STOREFRONT_API_VERSION: string;
+      PUBLIC_STOREFRONT_API_TOKEN: string;
+    };
+  };
 
   interface Env extends HydrogenEnv {
     // declare additional Env parameter use in the fetch handler and Remix loader context here
