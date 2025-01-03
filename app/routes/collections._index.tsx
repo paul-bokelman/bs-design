@@ -1,48 +1,28 @@
 import React from 'react';
 import {useLoaderData} from '@remix-run/react';
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {getPaginationVariables} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {CollectionCard} from '~/components';
+import * as queries from '~/api';
 
 export async function loader(args: LoaderFunctionArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return defer({...deferredData, ...criticalData});
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
-async function loadCriticalData({
-  context,
-  request,
-  params,
-}: LoaderFunctionArgs) {
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 4,
-  });
-
+async function loadCriticalData({context}: LoaderFunctionArgs) {
   const [{collections}] = await Promise.all([
-    context.storefront.query(COLLECTIONS_QUERY, {
-      variables: paginationVariables,
+    context.storefront.query(queries.Collections, {
+      variables: {
+        first: 250,
+      },
     }),
-    // Add other queries here, so that they are loaded in parallel
   ]);
 
   return {collections};
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
 function loadDeferredData({context}: LoaderFunctionArgs) {
   return {};
 }
@@ -51,59 +31,24 @@ export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex flex-col gap-0">
+    <div className="flex flex-col gap-0 mb-6">
       <h1 className="text-primary">Collections</h1>
-      <p className="text-secondary text-sm mb-4">Showing 4 of 4 collections</p>
-      <PaginatedResourceSection
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
-          <CollectionCard collection={collection} />
-        )}
-      </PaginatedResourceSection>
+      <p className="text-secondary text-sm mb-4">
+        Showing {collections.nodes.length} of {collections.nodes.length}{' '}
+        collections
+      </p>
+
+      {collections.nodes.length != 0 ? (
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+          {collections.nodes.map((collection) => (
+            <CollectionCard key={collection.id} collection={collection} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-secondary">
+          No collections found, please try again later
+        </p>
+      )}
     </div>
   );
 }
-
-const COLLECTIONS_QUERY = `#graphql
-  fragment Collection on Collection {
-    id
-    handle
-    description
-    image {
-      id
-      altText
-      url
-      width
-      height
-    }
-    title
-  }
-
-  query StoreCollections(
-    $country: CountryCode
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
-    $last: Int
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collections(
-      first: $first,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor
-    ) {
-      nodes {
-        ...Collection
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-` as const;

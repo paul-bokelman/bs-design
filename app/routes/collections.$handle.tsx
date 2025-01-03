@@ -1,19 +1,19 @@
-import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {useLoaderData, Link, type MetaFunction} from '@remix-run/react';
+import React from 'react';
+import type {CollectionFilterFragment} from 'storefrontapi.generated';
+import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {
-  getPaginationVariables,
-  Image,
-  Money,
-  Analytics,
-} from '@shopify/hydrogen';
-import type {ProductItemFragment} from 'storefrontapi.generated';
-import {useVariantUrl} from '~/lib/variants';
-import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
-import {ArrowLink, ProductCard} from '~/components';
-import {SearchX} from 'lucide-react';
+  useLoaderData,
+  type MetaFunction,
+  Link,
+  useNavigate,
+  useLocation,
+} from '@remix-run/react';
+import {ProductPreview, ProductsFilter} from '~/components/products/';
+import {Button} from '~/components/input';
+import * as queries from '~/api';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+  return [{title: `BS Design | Products`}];
 };
 
 export async function loader(args: LoaderFunctionArgs) {
@@ -26,160 +26,143 @@ export async function loader(args: LoaderFunctionArgs) {
   return defer({...deferredData, ...criticalData});
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
 async function loadCriticalData({
   context,
-  params,
   request,
+  params,
 }: LoaderFunctionArgs) {
-  const {handle} = params;
   const {storefront} = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
-  });
+  const handle = params.handle as string;
+  const query = new URLSearchParams(request.url.split('?')[1]);
 
-  if (!handle) {
-    throw redirect('/collections');
-  }
+  const numberOfProducts = query.get('first')
+    ? parseInt(query.get('first')!)
+    : 12;
 
-  const [{collection}] = await Promise.all([
-    storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
-      // Add other queries here, so that they are loaded in parallel
+  const filters = query.getAll('filters').map((f) => JSON.parse(f));
+
+  console.log(filters.);
+
+  const [
+    {collection},
+    {collection: collectionCount},
+    {collection: collectionFilter},
+  ] = await Promise.all([
+    storefront.query(queries.CollectionProducts, {
+      variables: {
+        handle,
+        first: numberOfProducts,
+        filters,
+      },
     }),
+    storefront.query(queries.CollectionTotalProducts, {variables: {handle}}),
+    storefront.query(queries.CollectionFilters, {variables: {handle}}),
   ]);
 
-  if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
-    });
+  if (!collection || !collectionCount) {
+    throw new Response('Not Found', {status: 404});
   }
 
   return {
     collection,
+    filters: collectionFilter?.products.filters,
+    totalProducts: collectionCount.products.nodes.length,
+    handle: params.handle as string,
   };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
 function loadDeferredData({context}: LoaderFunctionArgs) {
   return {};
 }
 
-export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+export default function Products() {
+  const {collection, filters, totalProducts, handle} =
+    useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleLoadMore = async () => {
+    setIsLoading(true);
+    const currentParams = new URLSearchParams(location.search);
+
+    if (currentParams.get('first')) {
+      currentParams.set(
+        'first',
+        (parseInt(currentParams.get('first')!) + 12).toString(),
+      );
+    } else {
+      currentParams.append('first', '24');
+    }
+
+    navigate(`${location.pathname}?${currentParams.toString()}`, {
+      replace: true,
+      preventScrollReset: true,
+    });
+  };
+
+  React.useEffect(() => {
+    setIsLoading(false);
+  }, [collection]);
+
+  if (collection.products.nodes.length === 0) {
+    return (
+      <div className="flex flex-col">
+        <h1 className="text-primary capitalize">{handle} Collection</h1>
+        <p className="text-secondary text-sm">
+          Showing 0 of {totalProducts} products
+        </p>
+
+        <p className="text-secondary mt-12">
+          This collection is empty, please try again later
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-0">
-      <h1 className="text-primary">{collection.title}</h1>
-      <p className="text-secondary text-sm mb-4">Showing 4 of 4 products</p>
-      {collection.products.nodes.length === 0 ? (
-        <div className="border border-secondary/30 rounded-md py-24 px-12 text-center flex flex-col w-full items-center justify-center gap-2">
-          <SearchX className="text-secondary" size={32} />
-          <div className="mt-4 flex flex-col justify-center items-center w-full">
-            <h2 className="text-primary text-xl">Collection Empty</h2>
-            <p className="text-secondary">
-              No products found in this collection. Please check again later.
-            </p>
-          </div>
-          <ArrowLink to="/collections" className="mt-4">
-            Back to Collections
-          </ArrowLink>
-        </div>
-      ) : (
-        <PaginatedResourceSection
-          connection={collection.products}
-          resourcesClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          {({node: product, index}) => <ProductCard product={product} />}
-        </PaginatedResourceSection>
-      )}
-      <Analytics.CollectionView
-        data={{
-          collection: {
-            id: collection.id,
-            handle: collection.handle,
-          },
-        }}
-      />
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col">
+        <h1 className="text-primary capitalize">{handle} Collection</h1>
+        {filters && (
+          <ProductsFilter
+            filters={filters as CollectionFilterFragment['filters']}
+          />
+        )}
+      </div>
+      <p className="text-secondary text-sm -mb-2">
+        Showing {collection.products.nodes.length} of {totalProducts} products
+      </p>
+
+      <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-x-6 gap-y-12">
+        {collection.products.nodes.map((product) => (
+          <ProductPreview
+            key={product.id}
+            collectionHandle={handle}
+            product={product}
+          />
+        ))}
+      </div>
+
+      <div className="flex w-full justify-center items-center mt-12 mb-6">
+        {collection.products.pageInfo.hasNextPage ? (
+          <Button
+            variant="primary"
+            onClick={async () => await handleLoadMore()}
+            disabled={!collection.products.pageInfo.hasNextPage || isLoading}
+            loading={isLoading}
+            loadingText="Loading..."
+          >
+            Load More
+          </Button>
+        ) : (
+          <p className="text-secondary text-sm mb-4">
+            Loaded {collection.products.nodes.length} of {totalProducts}{' '}
+            products
+          </p>
+        )}
+      </div>
     </div>
   );
 }
-
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 1) {
-      nodes {
-        selectedOptions {
-          name
-          value
-        }
-      }
-    }
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
-const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
-    $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor
-      ) {
-        nodes {
-          ...ProductItem
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
-      }
-    }
-  }
-` as const;

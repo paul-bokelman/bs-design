@@ -1,3 +1,4 @@
+import type {UIMatch} from '@remix-run/react';
 import React from 'react';
 import cn from 'classnames';
 import {Await, NavLink, useMatches} from '@remix-run/react';
@@ -6,6 +7,36 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
 import {MenuIcon, Search, ShoppingCart, X} from 'lucide-react';
 import logo from '~/assets/bs-logo.png';
+
+const navLinks: {
+  title: string;
+  url: string;
+  active: (matches: UIMatch<unknown, unknown>[]) => boolean;
+  mobile?: boolean;
+}[] = [
+  {
+    title: 'Home',
+    url: '/',
+    active: (matches) => matches.every((match) => match.pathname === '/'),
+  },
+  {
+    title: 'Collections',
+    url: '/collections',
+    active: (matches) =>
+      matches.some((match) => match.pathname.includes('collections')),
+  },
+  {
+    title: 'Gallery',
+    url: '/gallery',
+    active: (matches) => matches.some((match) => match.pathname === '/gallery'),
+  },
+  {
+    title: 'Cart',
+    url: '/cart',
+    active: (matches) => matches.some((match) => match.pathname === '/cart'),
+    mobile: true,
+  },
+];
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -34,10 +65,7 @@ export function Header({header, cart, publicStoreDomain}: HeaderProps) {
 }
 
 export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
   viewport,
-  publicStoreDomain,
 }: {
   menu: HeaderProps['header']['menu'];
   primaryDomainUrl: HeaderProps['header']['shop']['primaryDomain']['url'];
@@ -53,46 +81,30 @@ export function HeaderMenu({
     }
   }
 
-  const displayedMenu = menu || FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
-  // const displayedMenu = FALLBACK_HEADER_MENU; // todo: change back when we have a proper menu
+  const matches = useMatches();
 
   return (
     <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          className={activeLinkStyle}
-          onClick={closeAside}
-          prefetch="intent"
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
-      {displayedMenu.items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-
-        return (
+      {navLinks
+        .filter((link) => !link.mobile)
+        .map((link) => (
           <NavLink
-            className="cursor-pointer text-secondary hover:text-primary hover:scale-[1.02] transition-all"
+            className={cn(
+              'cursor-pointer  hover:text-primary hover:scale-[1.02] transition-all',
+              {
+                'text-primary': link.active(matches),
+                'text-secondary': !link.active(matches),
+              },
+            )}
             end
-            key={item.id}
+            key={link.url}
             onClick={closeAside}
             prefetch="intent"
-            to={url}
+            to={link.url}
           >
-            {item.title}
+            {link.title}
           </NavLink>
-        );
-      })}
+        ))}
     </nav>
   );
 }
@@ -135,39 +147,22 @@ function HeaderMenuMobileToggle() {
             </div>
             <div className="mt-12 w-full min-h-64 max-h-[calc(100%-15rem)] flex flex-col items-center justify-center">
               <div className="flex flex-col items-start gap-8">
-                {[
-                  {
-                    title: 'Home',
-                    url: '/',
-                    active: matches[1].id === 'routes/_index',
-                  },
-                  {
-                    title: 'Collections',
-                    url: '/collections',
-                    active: matches[1].id.includes('collections'),
-                  },
-                  {
-                    title: 'Cart',
-                    url: '/cart',
-                    active: matches[1].id.includes('cart'),
-                  },
-                  // {title: 'Search', url: '/search', active: false},
-                ].map((item) => (
+                {navLinks.map((link) => (
                   <NavLink
-                    key={item.title}
+                    key={link.title}
                     className={cn(
                       'cursor-pointer hover:text-primary hover:scale-[1.02] hover:font-bold transition-all text-5xl',
                       {
-                        'text-primary font-bold': item.active,
-                        'text-secondary font-semibold': !item.active,
+                        'text-primary font-bold': link.active(matches),
+                        'text-secondary font-semibold': !link.active(matches),
                       },
                     )}
                     end
                     prefetch="intent"
-                    to={item.url}
+                    to={link.url}
                     onClick={handleClick}
                   >
-                    {item.title}
+                    {link.title}
                   </NavLink>
                 ))}
               </div>
@@ -240,21 +235,6 @@ function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
     </React.Suspense>
   );
 }
-
-const FALLBACK_HEADER_MENU = {
-  id: 'gid://shopify/Menu/199655587896',
-  items: [
-    {
-      id: 'gid://shopify/MenuItem/461609500728',
-      resourceId: null,
-      tags: [],
-      title: 'Collections',
-      type: 'HTTP',
-      url: '/collections',
-      items: [],
-    },
-  ],
-};
 
 function activeLinkStyle({
   isActive,

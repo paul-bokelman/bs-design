@@ -177,16 +177,17 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center mt-32">
+    <div className="flex flex-col items-center justify-center mt-52">
       <div className="flex flex-col items-center justify-center gap-4">
         <h1 className="text-4xl text-primary font-bold">
           {errorStatus === 404 ? 'Page not found' : 'Something went wrong...'}
         </h1>
         <p className="text-secondary">
-          {errorMessage ||
-            'An unexpected error occurred, please try again later.'}
+          {errorStatus === 404
+            ? 'The page you are looking for does not exist.'
+            : 'An unexpected error occurred, please try again later.'}
         </p>
-        <ArrowLink to="/">Back Home</ArrowLink>
+        <ArrowLink to="/collections">Browse Collections</ArrowLink>
       </div>
     </div>
   );

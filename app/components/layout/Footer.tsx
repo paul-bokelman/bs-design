@@ -61,7 +61,7 @@ function FooterMenu({
               bsdesignsmtnhome@gmail.com
             </span>
             <span className="text-sm text-secondary">•</span>
-            <span className="text-sm text-secondary">208-590-8285</span>
+            <span className="text-sm text-secondary">+1 (208) 590-8285</span>
           </div>
         </div>
         <div className="flex flex-wrap justify-center lg:justify-end gap-4 lg:gap-6">

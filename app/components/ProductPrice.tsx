@@ -11,11 +11,12 @@ export function ProductPrice({
   return (
     <div className="text-secondary">
       {compareAtPrice ? (
-        <div className="product-price-on-sale">
+        <div className="flex gap-2">
           {price ? <Money data={price} /> : null}
-          <s>
-            <Money data={compareAtPrice} />
-          </s>
+          <Money
+            data={compareAtPrice}
+            className="text-secondary-faded line-through"
+          />
         </div>
       ) : price ? (
         <Money data={price} />
