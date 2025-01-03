@@ -41,8 +41,6 @@ async function loadCriticalData({
 
   const filters = query.getAll('filters').map((f) => JSON.parse(f));
 
-  console.log(filters.);
-
   const [
     {collection},
     {collection: collectionCount},
