@@ -12,29 +12,25 @@ import {
 } from '@shopify/hydrogen';
 import type {SelectedOption} from '@shopify/hydrogen/storefront-api-types';
 import {getVariantUrl} from '~/lib/variants';
-import {ProductPrice} from '~/components/ProductPrice';
-import {ProductImage} from '~/components/ProductImage';
-import {ProductForm} from '~/components/product';
+import {
+  ProductMediaPreview,
+  ProductForm,
+  ProductPrice,
+} from '~/components/product';
 import {ChevronLeftIcon} from 'lucide-react';
+import * as query from '~/api';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
+  return [{title: `BS Design | ${data?.product.title ?? ''}`}];
 };
 
 export async function loader(args: LoaderFunctionArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return defer({...deferredData, ...criticalData});
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
 async function loadCriticalData({
   context,
   params,
@@ -48,7 +44,7 @@ async function loadCriticalData({
   }
 
   const [{product}] = await Promise.all([
-    storefront.query(PRODUCT_QUERY, {
+    storefront.query(query.Product, {
       variables: {handle, selectedOptions: getSelectedProductOptions(request)},
     }),
     // Add other queries here, so that they are loaded in parallel
@@ -91,7 +87,7 @@ function loadDeferredData({context, params}: LoaderFunctionArgs) {
   // where variant options might show as available when they're not, but after
   // this deffered query resolves, the UI will update.
   const variants = context.storefront
-    .query(VARIANTS_QUERY, {
+    .query(query.ProductVariants, {
       variables: {handle: params.handle!},
     })
     .catch((error) => {
@@ -128,12 +124,13 @@ function redirectToFirstVariant({
 
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
+
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
     variants,
   );
 
-  const {title, descriptionHtml} = product;
+  const {title, descriptionHtml, media} = product;
 
   return (
     <div className="w-full lg:h-[36rem] flex justify-center items-center mb-12 lg:mb-0">
@@ -142,8 +139,7 @@ export default function Product() {
           to="/collections"
           className="text-secondary flex flex-row gap-1 items-center"
         >
-          <ChevronLeftIcon className="w-4 h-4" />
-          <span className="text-sm">Back to Collections</span>
+          <span className="text-sm">Collections / Wood / {title}</span>
         </Link>
         <div className="block lg:hidden">
           <ProductTitlePartial
@@ -153,26 +149,26 @@ export default function Product() {
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
         </div>
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center justify-center h-full md:h-full lg:h-[25rem]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center md:justify-start justify-center h-full md:h-full lg:h-[25rem]">
           <div className="flex flex-col md:flex-row items-center gap-2 h-full w-full lg:w-auto">
             {/* large screen size */}
             <div className="hidden md:flex flex-col gap-2 lg:h-full overflow-y-auto no-scrollbar rounded-md md:h-[30rem]">
-              {Array.from({length: 12}).map((_, index) => (
-                <div key={index} className="h-16 w-16">
-                  <ProductImage image={selectedVariant?.image} />
+              {media.edges.map((edge) => (
+                <div key={edge.node.id} className="h-16 w-16">
+                  <ProductMediaPreview {...edge.node} />
                 </div>
               ))}
             </div>
             {/* <div className="block lg:hidden absolute h-[30rem] w-[calc(100%-96px)] bg-white rounded-lg" /> */}
             <div className="relative w-full md:h-[30rem] lg:h-full md:max-w-auto md:max-h-auto md:w-auto">
-              <ProductImage image={selectedVariant?.image} />
+              <ProductMediaPreview {...media.edges[0].node} />
             </div>
             {/* below medium screen size */}
             <div className="flex mt-4 md:hidden flex-row gap-2 w-full overflow-x-auto rounded-md">
               <div className="flex flex-nowrap gap-2">
-                {Array.from({length: 12}).map((_, index) => (
-                  <div key={index} className="h-16 w-16 flex-shrink-0">
-                    <ProductImage image={selectedVariant?.image} />
+                {media.edges.map((edge) => (
+                  <div key={edge.node.id} className="h-16 w-16 flex-shrink-0">
+                    <ProductMediaPreview {...edge.node} />
                   </div>
                 ))}
               </div>
@@ -259,106 +255,3 @@ const ProductTitlePartial = ({
     </div>
   );
 };
-
-const PRODUCT_VARIANT_FRAGMENT = `#graphql
-  fragment ProductVariant on ProductVariant {
-    availableForSale
-    compareAtPrice {
-      amount
-      currencyCode
-    }
-    id
-    image {
-      __typename
-      id
-      url
-      altText
-      width
-      height
-    }
-    price {
-      amount
-      currencyCode
-    }
-    product {
-      title
-      handle
-    }
-    selectedOptions {
-      name
-      value
-    }
-    sku
-    title
-    unitPrice {
-      amount
-      currencyCode
-    }
-  }
-` as const;
-
-const PRODUCT_FRAGMENT = `#graphql
-  fragment Product on Product {
-    id
-    title
-    vendor
-    handle
-    descriptionHtml
-    description
-    options {
-      name
-      values
-    }
-    selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
-      ...ProductVariant
-    }
-    variants(first: 1) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-    seo {
-      description
-      title
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const PRODUCT_QUERY = `#graphql
-  query Product(
-    $country: CountryCode
-    $handle: String!
-    $language: LanguageCode
-    $selectedOptions: [SelectedOptionInput!]!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...Product
-    }
-  }
-  ${PRODUCT_FRAGMENT}
-` as const;
-
-const PRODUCT_VARIANTS_FRAGMENT = `#graphql
-  fragment ProductVariants on Product {
-    variants(first: 250) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const VARIANTS_QUERY = `#graphql
-  ${PRODUCT_VARIANTS_FRAGMENT}
-  query ProductVariants(
-    $country: CountryCode
-    $language: LanguageCode
-    $handle: String!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...ProductVariants
-    }
-  }
-` as const;
