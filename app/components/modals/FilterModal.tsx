@@ -106,7 +106,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 <X className="text-lg" onClick={() => closeModal()} />
               </div>
               <p className="font-semibold w-full flex justify-center items-center text-primary">
-                Products Filter
+                Filter
               </p>
             </div>
             <div className="max-h-96 flex flex-col gap-8 overflow-y-scroll px-8">

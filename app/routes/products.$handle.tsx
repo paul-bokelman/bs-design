@@ -143,7 +143,7 @@ export default function Product() {
         </Link>
         <div className="block lg:hidden">
           <ProductTitlePartial
-            title="Personalized Badge"
+            title={title}
             category="FABRICS"
             price={selectedVariant?.price}
             compareAtPrice={selectedVariant?.compareAtPrice}
@@ -177,7 +177,7 @@ export default function Product() {
           <div className="flex flex-col h-full justify-start w-full lg:w-1/2">
             <div className="hidden lg:block text-left">
               <ProductTitlePartial
-                title="Personalized Badge"
+                title={title}
                 category="FABRICS"
                 price={selectedVariant?.price}
                 compareAtPrice={selectedVariant?.compareAtPrice}
