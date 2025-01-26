@@ -1,8 +1,16 @@
 import React from 'react';
 import {useLoaderData} from '@remix-run/react';
-import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {
+  defer,
+  type LoaderFunctionArgs,
+  type MetaFunction,
+} from '@shopify/remix-oxygen';
 import {CollectionCard} from '~/components';
 import * as queries from '~/api';
+
+export const meta: MetaFunction<typeof loader> = () => {
+  return [{title: `BS Design | Collections`}];
+};
 
 export async function loader(args: LoaderFunctionArgs) {
   const deferredData = loadDeferredData(args);

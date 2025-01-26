@@ -1,6 +1,10 @@
 import {json, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {useLoaderData, Link} from '@remix-run/react';
+import {useLoaderData, type MetaFunction} from '@remix-run/react';
 import {ArrowLink} from '~/components';
+
+export const meta: MetaFunction<typeof loader> = ({data}) => {
+  return [{title: 'BS Design | Policies'}];
+};
 
 export async function loader({context}: LoaderFunctionArgs) {
   const data = await context.storefront.query(POLICIES_QUERY);

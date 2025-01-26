@@ -28,7 +28,7 @@ export function CartLineItem({
   const {close} = useAside();
 
   return (
-    <div key={id} className="flex flex-row gap-4">
+    <div key={id} className="flex flex-row gap-4 overflow-hidden">
       {image && (
         <Image
           alt={title}
@@ -40,7 +40,7 @@ export function CartLineItem({
           className="rounded-lg"
         />
       )}
-      <div className="flex flex-col">
+      <div className="flex flex-col w-full">
         <Link
           prefetch="intent"
           to={lineItemUrl}
@@ -55,9 +55,11 @@ export function CartLineItem({
           </p>
         </Link>
         <ProductPrice price={line?.cost?.totalAmount} />
-        <span className="text-sm text-secondary">
-          Personalized ({selectedOptions.length})
-        </span>
+        <div className="overflow-x-scroll no-scrollbar">
+          <span className="text-sm text-secondary whitespace-nowrap">
+            {selectedOptions.map((option) => option.value).join(', ')}
+          </span>
+        </div>
         <CartLineQuantity line={line} />
       </div>
     </div>

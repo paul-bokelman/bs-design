@@ -4,18 +4,15 @@ import {
   type ActionFunctionArgs,
 } from '@shopify/remix-oxygen';
 import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
-import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
-import {SearchForm} from '~/components/SearchForm';
-import {SearchResults} from '~/components/SearchResults';
+import {getPaginationVariables} from '@shopify/hydrogen';
 import {
   type RegularSearchReturn,
   type PredictiveSearchReturn,
   getEmptyPredictiveSearchResult,
 } from '~/lib/search';
-import {Button} from '~/components/input';
 
 export const meta: MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+  return [{title: `BS Design | Search`}];
 };
 
 export async function loader({request, context}: LoaderFunctionArgs) {

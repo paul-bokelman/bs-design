@@ -1,9 +1,6 @@
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {type MetaFunction, useLoaderData, Link} from '@remix-run/react';
-import {ArrowRight} from 'lucide-react';
-import {ArrowLink} from '~/components';
+import {type MetaFunction} from '@remix-run/react';
 import logo from '~/assets/bs-logo.png';
-import galleryImage from '~/assets/gallery-image.jpg';
 
 export const meta: MetaFunction = () => {
   return [{title: 'BS Design | Gallery'}];
