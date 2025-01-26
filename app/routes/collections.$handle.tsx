@@ -11,6 +11,8 @@ import {
 import {ProductPreview, ProductsFilter} from '~/components/products/';
 import {Button} from '~/components/input';
 import * as queries from '~/api';
+import {SearchX} from 'lucide-react';
+import {ArrowLink} from '~/components';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `BS Design | Products`}];
@@ -124,6 +126,7 @@ export default function Products() {
         <h1 className="text-primary capitalize">{handle} Collection</h1>
         {filters && (
           <ProductsFilter
+            disabled={totalProducts === 0}
             filters={filters as CollectionFilterFragment['filters']}
           />
         )}
@@ -166,13 +169,19 @@ export default function Products() {
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-2 mt-24">
-          <p className="text-secondary">
-            No products found{' '}
-            {activeFilters.length > 0
-              ? 'try clearing your filter.'
-              : 'please check in later.'}
-          </p>
+        <div className="flex flex-col gap-4 w-full justify-center items-center">
+          <div className="flex flex-col w-full p-4 text-center gap-4 h-64 justify-center items-center border border-secondary-faded rounded-md text-secondary">
+            <SearchX size={28} />
+            <p>
+              No products found{' '}
+              {activeFilters.length > 0
+                ? 'try clearing your filter.'
+                : 'please check in later.'}
+            </p>
+          </div>
+          <ArrowLink to="/collections" className="text-primary">
+            Back to Collections
+          </ArrowLink>
         </div>
       )}
     </div>

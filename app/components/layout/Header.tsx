@@ -49,7 +49,7 @@ type Viewport = 'desktop' | 'mobile';
 export function Header({header, cart, publicStoreDomain}: HeaderProps) {
   const {shop, menu} = header;
   return (
-    <header className="bg-gradient-to-b from-black to-black/80 flex items-center px-12 h-header sticky top-0 z-[3] rounded-b-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[6px]">
+    <header className="bg-gradient-to-b from-black to-black/80 flex items-center md:px-12 px-6 h-header sticky top-0 z-[3] rounded-b-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[6px]">
       <NavLink prefetch="intent" to="/" className={activeLinkStyle} end>
         <img src={logo} alt="BS Logo" height={50} width={50} />
       </NavLink>
@@ -134,7 +134,7 @@ function HeaderMenuMobileToggle() {
     <>
       {isOpen && (
         <div className="fixed inset-0 w-screen h-screen bg-black/95 z-[30] shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-filter backdrop-blur-[30px]">
-          <div className="relative w-full h-full px-12 py-[1.85rem]">
+          <div className="relative w-full h-full md:px-12 px-6 py-[1.85rem]">
             <div className="w-full flex justify-between">
               <NavLink prefetch="intent" to="/" end>
                 <img src={logo} alt="BS Logo" height={50} width={50} />

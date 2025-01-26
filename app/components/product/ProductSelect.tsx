@@ -10,7 +10,7 @@ export const ProductSelect: React.FC<ProductSelectProps> = ({option}) => {
   return (
     <div key={option.name} className="flex flex-col gap-2">
       <h5 className="text-secondary text-sm">{option.name}</h5>
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 overflow-x-scroll">
         {option.values.map(({value, isAvailable, isActive, to}) => {
           return (
             <Link

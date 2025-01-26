@@ -1,6 +1,7 @@
+import type {CollectionProductFragment} from 'storefrontapi.generated';
 import {Link} from '@remix-run/react';
 import {Image, Money} from '@shopify/hydrogen';
-import type {CollectionProductFragment} from 'storefrontapi.generated';
+import qs from 'query-string';
 import {useVariantUrl} from '~/lib/variants';
 
 type ProductPreviewProps = {
@@ -13,13 +14,21 @@ export const ProductPreview: React.FC<ProductPreviewProps> = ({
   product,
 }) => {
   const variant = product.variants.nodes[0];
-  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+  const parsedURL = qs.parseUrl(
+    useVariantUrl(product.handle, variant.selectedOptions),
+  );
+
+  const productURL = qs.stringifyUrl({
+    url: parsedURL.url,
+    query: {collection: collectionHandle, ...parsedURL.query},
+  });
+
   return (
     <Link
       className="flex flex-col gap-2 group"
       key={product.id}
       prefetch="intent"
-      to={variantUrl}
+      to={productURL}
     >
       {product.featuredImage && (
         <Image

@@ -90,6 +90,7 @@ export function ProductForm({
           if (attribute.key === 'message') {
             return (
               <ProductTextField
+                key={attribute.key}
                 label="Message"
                 value={attribute.value}
                 required={!attribute.optional}
@@ -102,7 +103,7 @@ export function ProductForm({
               />
             );
           } else if (attribute.key === 'file') {
-            return <ProductFileUpload />;
+            return <ProductFileUpload key={attribute.key} />;
           }
         })}
       </div>

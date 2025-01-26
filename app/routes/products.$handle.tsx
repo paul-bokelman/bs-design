@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import * as React from 'react';
 import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Await, Link, useLoaderData, type MetaFunction} from '@remix-run/react';
 import type {
@@ -11,13 +11,13 @@ import {
   useOptimisticVariant,
 } from '@shopify/hydrogen';
 import type {SelectedOption} from '@shopify/hydrogen/storefront-api-types';
+import qs from 'query-string';
 import {getVariantUrl} from '~/lib/variants';
 import {
   ProductMediaPreview,
   ProductForm,
   ProductPrice,
 } from '~/components/product';
-import {ChevronLeftIcon} from 'lucide-react';
 import * as query from '~/api';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
@@ -42,6 +42,8 @@ async function loadCriticalData({
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
+
+  const q = qs.parseUrl(request.url);
 
   const [{product}] = await Promise.all([
     storefront.query(query.Product, {
@@ -72,7 +74,11 @@ async function loadCriticalData({
     }
   }
 
-  return {product};
+  if (!q.query?.collection) {
+    throw new Error('Expected collection handle to be defined');
+  }
+
+  return {product, collectionHandle: q.query?.collection as string};
 }
 
 /**
@@ -123,7 +129,10 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants} = useLoaderData<typeof loader>();
+  const {product, variants, collectionHandle} = useLoaderData<typeof loader>();
+  const [selectedMedia, setSelectedMedia] = React.useState(
+    product.media.edges[0].node,
+  );
 
   const selectedVariant = useOptimisticVariant(
     product.selectedVariant,
@@ -134,13 +143,23 @@ export default function Product() {
 
   return (
     <div className="w-full lg:h-[36rem] flex justify-center items-center mb-12 lg:mb-0">
-      <div className="flex flex-col gap-6 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Link
-          to="/collections"
-          className="text-secondary flex flex-row gap-1 items-center"
-        >
-          <span className="text-sm">Collections / Wood / {title}</span>
-        </Link>
+      <div className="flex flex-col gap-6 w-full max-w-7xl">
+        <span className="text-secondary flex flex-row gap-1 items-center text-sm capitalize">
+          <Link
+            to="/collections"
+            className="transition-colors hover:text-primary hover:underline"
+          >
+            Collections
+          </Link>{' '}
+          /{' '}
+          <Link
+            to={`/collections/${collectionHandle}`}
+            className="transition-colors hover:text-primary hover:underline"
+          >
+            {collectionHandle}
+          </Link>{' '}
+          / {title}
+        </span>
         <div className="block lg:hidden">
           <ProductTitlePartial
             title={title}
@@ -149,32 +168,27 @@ export default function Product() {
             compareAtPrice={selectedVariant?.compareAtPrice}
           />
         </div>
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 items-center md:justify-start justify-center h-full md:h-full lg:h-[25rem]">
-          <div className="flex flex-col md:flex-row items-center gap-2 h-full w-full lg:w-auto">
-            {/* large screen size */}
-            <div className="hidden md:flex flex-col gap-2 lg:h-full overflow-y-auto no-scrollbar rounded-md md:h-[30rem]">
-              {media.edges.map((edge) => (
-                <div key={edge.node.id} className="h-16 w-16">
-                  <ProductMediaPreview {...edge.node} />
-                </div>
-              ))}
+        <div className="flex flex-col lg:flex-row lg:gap-12 gap-4 items-center md:justify-start justify-center h-full lg:h-[25rem]">
+          <div className="flex flex-col lg:items-start items-center gap-2 lg:h-[100%+4rem] h-[100%+5rem] lg:w-fit w-full">
+            <div className="lg:h-[20rem] lg:w-[20rem] h-full w-full">
+              <ProductMediaPreview {...selectedMedia} />
             </div>
-            {/* <div className="block lg:hidden absolute h-[30rem] w-[calc(100%-96px)] bg-white rounded-lg" /> */}
-            <div className="relative w-full md:h-[30rem] lg:h-full md:max-w-auto md:max-h-auto md:w-auto">
-              <ProductMediaPreview {...media.edges[0].node} />
-            </div>
-            {/* below medium screen size */}
-            <div className="flex mt-4 md:hidden flex-row gap-2 w-full overflow-x-auto rounded-md">
-              <div className="flex flex-nowrap gap-2">
+            <div className="flex w-full mt-4 flex-row rounded-md overflow-x-scroll">
+              <div className="flex gap-2 flex-nowrap">
                 {media.edges.map((edge) => (
-                  <div key={edge.node.id} className="h-16 w-16 flex-shrink-0">
+                  <button
+                    key={edge.node.id}
+                    className="lg:h-16 lg:w-16 h-20 w-20 flex-shrink-0 hover:opacity-80 transition-opacity"
+                    onClick={() => setSelectedMedia(edge.node)}
+                  >
                     <ProductMediaPreview {...edge.node} />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           </div>
-          <div className="flex flex-col h-full justify-start w-full lg:w-1/2">
+
+          <div className="flex flex-col h-full justify-start w-full">
             <div className="hidden lg:block text-left">
               <ProductTitlePartial
                 title={title}
@@ -183,7 +197,7 @@ export default function Product() {
                 compareAtPrice={selectedVariant?.compareAtPrice}
               />
             </div>
-            <Suspense
+            <React.Suspense
               fallback={
                 <ProductForm
                   product={product}
@@ -204,7 +218,7 @@ export default function Product() {
                   />
                 )}
               </Await>
-            </Suspense>
+            </React.Suspense>
           </div>
         </div>
       </div>

@@ -4,9 +4,12 @@ import {Button} from '~/components/input';
 import {Filter} from 'lucide-react';
 import {FilterModal} from '~/components/modals';
 
-type ProductsFilterProps = CollectionFilterFragment;
+type ProductsFilterProps = CollectionFilterFragment & {disabled?: boolean};
 
-export const ProductsFilter: React.FC<ProductsFilterProps> = ({filters}) => {
+export const ProductsFilter: React.FC<ProductsFilterProps> = ({
+  disabled,
+  filters,
+}) => {
   const [showFiltersModal, setShowFiltersModal] = React.useState(false);
   const [activeFilters, setActiveFilters] = React.useState<number>(0);
 
@@ -17,6 +20,7 @@ export const ProductsFilter: React.FC<ProductsFilterProps> = ({filters}) => {
           <Button
             icon={Filter}
             variant="secondary"
+            disabled={disabled}
             onClick={() => setShowFiltersModal(true)}
           >
             Filters

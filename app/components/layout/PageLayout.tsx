@@ -40,7 +40,7 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       )}
-      <main className="px-12 min-h-[calc(100vh-var(--header-height)-var(--mobile-footer-height))] lg:min-h-[calc(100vh-var(--header-height)-var(--footer-height))]">
+      <main className="md:px-12 px-6 min-h-[calc(100vh-var(--header-height)-var(--mobile-footer-height))] lg:min-h-[calc(100vh-var(--header-height)-var(--footer-height))]">
         {children}
       </main>
       <Footer

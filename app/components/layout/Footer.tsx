@@ -44,7 +44,7 @@ function FooterMenu({
 }) {
   return (
     <nav
-      className="flex items-center justify-center px-4 lg:px-12 h-mobile-footer lg:h-footer bg-black"
+      className="flex items-center justify-center px-4 lg:px-12 h-mobile-footer lg:h-footer bg-black md:mb-0 mb-4"
       role="navigation"
     >
       <div className="flex flex-col lg:flex-row w-full justify-between">
@@ -56,11 +56,11 @@ function FooterMenu({
             width={40}
             className="mb-2 lg:mb-0 lg:mr-4"
           />
-          <div className="flex flex-row items-center justify-center lg:items-start gap-2">
+          <div className="flex md:flex-row flex-col items-center justify-center lg:items-start gap-2">
             <span className="text-sm text-secondary">
               bsdesignsmtnhome@gmail.com
             </span>
-            <span className="text-sm text-secondary">•</span>
+            <span className="text-sm text-secondary hidden md:block">•</span>
             <span className="text-sm text-secondary">+1 (208) 590-8285</span>
           </div>
         </div>
